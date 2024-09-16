@@ -1,0 +1,30 @@
+{
+
+	"Listener": [
+		{
+			"name": "AGListener",
+			"port": 40001
+		}
+		   ],
+	
+	"Primary": [
+		{
+			"name": "SQL01\\SQL1",
+			"port": 40001
+		}
+		   ],
+
+	"Secondaries": [
+		{
+			"name": "SQL02\\SQL2",
+			"port": 40002
+		},
+
+		{
+			"name": "SQL03\\SQL2",
+			"port": 40003
+
+		}
+		     ]
+
+}

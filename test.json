@@ -1,0 +1,28 @@
+{
+"Instance1": [
+    {
+        "Server": "SQL01",
+        "Instance": "SQL1",
+	"Port": 40001
+    }
+],
+"Instance2": [
+
+	{
+        "Server": "SQL02",
+        "Instance": "SQL2",
+	"Port": 40002
+    }
+    
+],
+"Instance3": [
+
+	{
+        "Server": "SQL03",
+        "Instance": "SQL2",
+	"Port": 40003
+    }
+
+    
+]
+}
