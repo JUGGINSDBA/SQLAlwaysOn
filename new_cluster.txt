@@ -1,0 +1,75 @@
+[array]$Nodes = (($Config).Servers).ServerName
+
+$ClusterName = (($Config).WSFC).ClusterName;
+
+$ClusterIPAddress = (($Config).WSFC).ClusterIP;
+
+$IgnoreIPRange = (($Config).WSFC).IgnoreIPRange;
+
+$QuorumType = (($Config).WSFC).QuorumType;
+
+$FileShareSecurityGroup = (($Config).WSFC).FileShareSecurityGroup;
+
+$FileShareWitness = (($Config).WSFC).FileShareWitness;
+
+$DNSRoot = ($Config).DomainName;
+
+ 
+
+ForEach ($Server in $Nodes) {
+
+    Invoke-Command -ComputerName $Server -ScriptBlock {
+
+    Import-Module ServerManager;
+
+    Add-WindowsFeature Failover-Clustering -IncludeManagementTools;
+
+}}
+
+ 
+
+Import-Module ActiveDirectory;
+
+Import-Module FailoverClusters;
+
+$ClusterList = [string]::Join(“,”,$Nodes);
+
+ 
+
+Test-Cluster -Node $ClusterList;
+
+ 
+
+New-Cluster -Name $ClusterName -Node $ClusterList -NoStorage -StaticAddress $ClusterIPAddress -IgnoreNetwork $IgnoreIPRange”;
+
+ 
+
+If ($QuorumType -eq “NodeMajority”) {
+
+              Set-ClusterQuorum -Cluster “$ClusterName`.$DNSRoot” -NodeMajority;
+
+}
+
+If ($QuorumType -eq “NodeAndDiskMajority”) {
+
+              Set-ClusterQuorum -Cluster “$ClusterName`.$DNSRoot” -NodeAndDiskMajority;
+
+}
+
+If ($QuorumType -eq “NodeAndFileShareMajority”) {
+
+              Add-ADGroupMember $FileShareSecurityGroup -Members “$ClusterName$”;
+
+              Start-Sleep -Seconds 10 # Wait for cluster object & permissions to replicate across DCs
+
+              Set-ClusterQuorum -Cluster “$ClusterName`.$DNSRoot” -FileShareWitness $FileShareWitness;
+
+}
+
+If ($QuorumType -eq “DiskOnly”) {
+
+              Set-ClusterQuorum -Cluster “$ClusterName`.$DNSRoot” -DiskOnly “Cluster Disk 1”;
+
+}
+
+Start-Cluster -Name “$ClusterName`.$DNSRoot”;
