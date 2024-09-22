@@ -1,0 +1,29 @@
+{
+       "Servers":	[
+		{
+			"Name": "SQL01",
+			"Instance": "SPX_001"
+		},
+		{
+			"Name": "SQL02",
+			"Instance": "SPX_002"
+		},
+		{
+			"Name": "SQL03",
+			"Instance": "SPX_002"
+		}
+
+		
+			],
+    	"Cluster":[
+		{
+			"Name": "CLUSTER01",
+			"StaticIP": "10.10.10.56",
+			"Storage": 0,
+			"IgnoreNetwork": 1,
+			"IgnoreIPRange": 1
+		}
+			
+		]
+
+}
