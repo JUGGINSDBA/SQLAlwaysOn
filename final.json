@@ -1,0 +1,20 @@
+{
+       "Replicas":
+		[
+			{
+				"Name": ["SQL01","SQL02","SQL03"],
+				"InstanceName": "SPX_001",
+				"Port": 45001
+			}		
+		],
+
+
+	"DbaAgHadr":
+		[
+			{
+				"Enable": 1
+			}
+		]
+
+
+}
