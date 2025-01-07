@@ -1,0 +1,49 @@
+ # PowerShell script to retrieve SQL Server Information from the registry
+$m = "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server"
+$inst = (get-itemproperty $m).InstalledInstances
+foreach ($i in $inst)
+{
+       $in = (Get-ItemProperty "$m\Instance Names\SQL").$i
+       $p = $m+"\"+$in
+       "-------------------------------------------------------------------`nServer Properties: "
+       If ($i -Eq "MSSQLSERVER") {$r=" (Default)"} Else {$r=""}
+       "`tInstance Name : $i$r"
+       "`tVersion       : "+(Get-ItemProperty "$p\Setup").Version
+       "`tSP            : "+(Get-ItemProperty "$p\Setup").SP
+       "`tEdition       : "+(Get-ItemProperty "$p\Setup").Edition
+       "`tLanguage      : "+(Get-ItemProperty "$p\Setup").Language
+       "`tCollation     : "+(Get-ItemProperty "$p\Setup").Collation
+       "`tSqlProgramDir : "+(Get-ItemProperty "$p\Setup").SqlProgramDir
+"`tSQLPath       : "+(Get-ItemProperty "$p\Setup").SQLPath
+       "`tSQLBinRoot    : "+(Get-ItemProperty "$p\Setup").SQLBinRoot
+       "`tSQLDataRoot   : "+(Get-ItemProperty "$p\Setup").SQLDataRoot
+"`tErrorDumpDir  : "+(Get-ItemProperty "$p\CPE").ErrorDumpDir
+       $p="$p\MSSQLServer"
+       "`tBackupDir     : "+(Get-ItemProperty "$p\").BackupDirectory
+       If ((Get-ItemProperty "$p\").LoginMode -Eq 1) {$r="Windows"} `
+       ElseIf ((Get-ItemProperty "$p\").LoginMode -Eq 2) {$r="Mixed"} Else {$r="Other"}
+       "`tLoginMode     : $r Authentication Mode"
+       If ((Get-ItemProperty "$p\HADR").HADR_Enabled) {$r="Enabled"} Else {$r="Disabled"}
+       "`tHADR          : $r"
+       "`nStartup Parameters: "
+       (Get-ItemProperty "$p\Parameters" | Select SQLArg*  | Format-List | Out-String ).trim() -replace "SQLArg","`tSQLArg"
+
+       $p="$p\SuperSocketNetLib"
+       If ((Get-ItemProperty "$p").ForceEncryption) {$r="Yes"} Else {$r="No"}
+       "`nProtocol Properties: "
+       "`tForceEncryption: $r"
+       If ((Get-ItemProperty "$p").HideInstance) {$r="Yes"} Else {$r="No"}
+       "`tHideInstance: $r"
+       $r="`t"+(Get-ItemProperty "$p\AdminConnection").DisplayName+": "
+       $r=$r+(Get-ItemProperty "$p\AdminConnection\Tcp").DisplayName+" "
+       $r+(Get-ItemProperty "$p\AdminConnection\Tcp").TcpDynamicPorts
+       "`nNetwork Protocols: "
+       If ((Get-ItemProperty "$p\Np").Enabled) {$r="Enabled"} Else {$r="Disabled"}; "`t"+((Get-ItemProperty "$p\Np").DisplayName)+": $r";
+       If ((Get-ItemProperty "$p\Sm").Enabled) {$r="Enabled"} Else {$r="Disabled"}; "`t"+((Get-ItemProperty "$p\Sm").DisplayName)+": $r"
+       If ((Get-ItemProperty "$p\Via").Enabled) {$r="Enabled"} Else {$r="Disabled"};"`t"+((Get-ItemProperty "$p\Via").DisplayName)+": $r"
+       If ((Get-ItemProperty "$p\Tcp").Enabled) {$r="Enabled"} Else {$r="Disabled"};"`t"+((Get-ItemProperty "$p\Tcp").DisplayName)+": $r"
+       If ((Get-ItemProperty "$p\Tcp").ListenOnAllIPs) {$r="Yes"} Else {$r="No"}; "`t"+"TCP ListenOnAllIPs:$r "
+
+       Get-ChildItem "$p\Tcp" | ForEach-Object {Get-ItemProperty $_.pspath} `
+       | Format-Table -Autosize -Property PSChildName, Enabled, Active, TcpPort, TcpDynamicPorts, IpAddress, DisplayName
+} 
